@@ -87,7 +87,6 @@
     letter-spacing: 0.5px;
   }
 
-  /* Styled Text Inputs */
   .input-box {
     font-family: inherit;
     font-size: 15px;
@@ -103,19 +102,14 @@
     transition: border-color 0.2s;
   }
 
-  .input-box:focus {
-    border-color: var(--accent);
-  }
+  .input-box:focus { border-color: var(--accent); }
 
-  /* Remove default arrows on number inputs */
   .input-box::-webkit-outer-spin-button,
   .input-box::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
   }
-  .input-box[type=number] {
-    -moz-appearance: textfield;
-  }
+  .input-box[type=number] { -moz-appearance: textfield; }
 
   input[type=range] {
     -webkit-appearance: none;
@@ -142,14 +136,6 @@
   }
 
   input[type=range]::-webkit-slider-thumb:active { transform: scale(1.15); }
-  input[type=range]::-moz-range-thumb {
-    width: 20px; height: 20px;
-    border-radius: 50%;
-    background: var(--accent);
-    border: 3px solid var(--surface);
-    box-shadow: 0 0 0 1.5px var(--accent);
-    cursor: pointer;
-  }
 
   .results {
     display: grid;
@@ -290,10 +276,8 @@
 
   const pSlider = document.getElementById('principal');
   const pText = document.getElementById('p-text');
-  
   const rSlider = document.getElementById('rate');
   const rText = document.getElementById('r-text');
-  
   const tSlider = document.getElementById('tenure');
   const tText = document.getElementById('t-text');
 
@@ -320,35 +304,12 @@
     document.getElementById('yr-hint').textContent = y === 1 ? '1 year' : y + ' years';
   }
 
-  // Sync Principal
-  pSlider.addEventListener('input', function() {
-    pText.value = this.value;
-    calc();
-  });
-  pText.addEventListener('input', function() {
-    pSlider.value = this.value;
-    calc();
-  });
-
-  // Sync Rate
-  rSlider.addEventListener('input', function() {
-    rText.value = parseFloat(this.value).toFixed(1);
-    calc();
-  });
-  rText.addEventListener('input', function() {
-    rSlider.value = this.value;
-    calc();
-  });
-
-  // Sync Tenure
-  tSlider.addEventListener('input', function() {
-    tText.value = this.value;
-    calc();
-  });
-  tText.addEventListener('input', function() {
-    tSlider.value = this.value;
-    calc();
-  });
+  pSlider.addEventListener('input', function() { pText.value = this.value; calc(); });
+  pText.addEventListener('input', function() { pSlider.value = this.value; calc(); });
+  rSlider.addEventListener('input', function() { rText.value = parseFloat(this.value).toFixed(1); calc(); });
+  rText.addEventListener('input', function() { rSlider.value = this.value; calc(); });
+  tSlider.addEventListener('input', function() { tText.value = this.value; calc(); });
+  tText.addEventListener('input', function() { tSlider.value = this.value; calc(); });
 
   calc();
 </script>
