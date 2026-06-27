@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMI Calculator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --surface-2: #f0eeea;
+    --text: #1a1a18;
+    --text-muted: #6b6b67;
+    --accent: #1a5cff;
+    --accent-light: #e8eeff;
+    --danger: #d63a2f;
+    --danger-light: #fdecea;
+    --border: rgba(0,0,0,0.1);
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.06);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141412;
+      --surface: #1e1e1b;
+      --surface-2: #2a2a27;
+      --text: #f0efe9;
+      --text-muted: #8a8a85;
+      --accent: #4d7dff;
+      --accent-light: #0d1a3d;
+      --danger: #e85c52;
+      --danger-light: #2e100e;
+      --border: rgba(255,255,255,0.09);
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2.5rem 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 2rem 2rem 2.5rem;
+    width: 100%;
+    max-width: 540px;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    margin-bottom: 0.25rem;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+
+  .field { margin-bottom: 1.5rem; }
+
+  .field-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .field-header label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Styled Text Inputs */
+  .input-box {
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 4px 8px;
+    text-align: right;
+    width: 140px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .input-box:focus {
+    border-color: var(--accent);
+  }
+
+  /* Remove default arrows on number inputs */
+  .input-box::-webkit-outer-spin-button,
+  .input-box::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .input-box[type=number] {
+    -moz-appearance: textfield;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--surface-2);
+    border-radius: 99px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--surface);
+    box-shadow: 0 0 0 1.5px var(--accent);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+
+  input[type=range]::-webkit-slider-thumb:active { transform: scale(1.15); }
+  input[type=range]::-moz-range-thumb {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--surface);
+    box-shadow: 0 0 0 1.5px var(--accent);
+    cursor: pointer;
+  }
+
+  .results {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 2rem 0 1.5rem;
+  }
+
+  .result-card {
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    padding: 1rem;
+  }
+
+  .result-card.highlight { background: var(--accent-light); }
+
+  .result-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .result-card.highlight .result-label { color: var(--accent); }
+
+  .result-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    word-break: break-all;
+  }
+
+  .result-card.highlight .result-value { color: var(--accent); }
+
+  .breakdown-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .bar-track {
+    height: 10px;
+    background: var(--surface-2);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.35s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .legend {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+
+  .tenure-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>EMI Calculator</h1>
+  <p class="subtitle">Equated monthly instalment estimator</p>
+
+  <div class="field">
+    <div class="field-header">
+      <label>Loan amount (₹)</label>
+      <input type="number" id="p-text" class="input-box" value="100000000" min="10000" max="1000000000">
+    </div>
+    <input type="range" id="principal" min="10000" max="100000000" step="10000" value="100000000">
+  </div>
+
+  <div class="field">
+    <div class="field-header">
+      <label>Annual rate (%)</label>
+      <input type="number" id="r-text" class="input-box" value="50.0" min="0.1" max="100" step="0.1">
+    </div>
+    <input type="range" id="rate" min="1" max="50" step="0.1" value="50">
+  </div>
+
+  <div class="field">
+    <div class="field-header">
+      <label>Tenure (months)</label>
+      <input type="number" id="t-text" class="input-box" value="720" min="1" max="1200">
+    </div>
+    <input type="range" id="tenure" min="1" max="720" step="1" value="720">
+    <div class="tenure-hint" id="yr-hint">60 years</div>
+  </div>
+
+  <div class="results">
+    <div class="result-card highlight">
+      <div class="result-label">Monthly EMI</div>
+      <div class="result-value" id="emi-out">—</div>
+    </div>
+    <div class="result-card">
+      <div class="result-label">Total interest</div>
+      <div class="result-value" id="int-out">—</div>
+    </div>
+    <div class="result-card">
+      <div class="result-label">Total payment</div>
+      <div class="result-value" id="total-out">—</div>
+    </div>
+  </div>
+
+  <div class="breakdown-label">Principal vs interest</div>
+  <div class="bar-track"><div class="bar-fill" id="bar"></div></div>
+  <div class="legend">
+    <span><span class="dot" style="background:var(--accent)"></span>Principal <span id="p-pct"></span></span>
+    <span><span class="dot" style="background:var(--surface-2);border:1.5px solid var(--text-muted)"></span>Interest <span id="i-pct"></span></span>
+  </div>
+</div>
+
+<script>
+  const fmt = n => '₹' + Math.round(n).toLocaleString('en-IN');
+
+  const pSlider = document.getElementById('principal');
+  const pText = document.getElementById('p-text');
+  
+  const rSlider = document.getElementById('rate');
+  const rText = document.getElementById('r-text');
+  
+  const tSlider = document.getElementById('tenure');
+  const tText = document.getElementById('t-text');
+
+  function calc() {
+    const P = +pText.value;
+    const r = +rText.value / 12 / 100;
+    const N = +tText.value;
+
+    if (P <= 0 || N <= 0) return;
+
+    const emi = r === 0 ? P / N : P * r * Math.pow(1+r,N) / (Math.pow(1+r,N)-1);
+    const total = emi * N;
+    const interest = total - P;
+    const pPct = total > 0 ? (P / total * 100) : 0;
+
+    document.getElementById('emi-out').textContent = fmt(emi);
+    document.getElementById('int-out').textContent = fmt(interest);
+    document.getElementById('total-out').textContent = fmt(total);
+    document.getElementById('bar').style.width = pPct.toFixed(1) + '%';
+    document.getElementById('p-pct').textContent = pPct.toFixed(1) + '%';
+    document.getElementById('i-pct').textContent = (100-pPct).toFixed(1) + '%';
+
+    const y = Math.round(N/12*10)/10;
+    document.getElementById('yr-hint').textContent = y === 1 ? '1 year' : y + ' years';
+  }
+
+  // Sync Principal
+  pSlider.addEventListener('input', function() {
+    pText.value = this.value;
+    calc();
+  });
+  pText.addEventListener('input', function() {
+    pSlider.value = this.value;
+    calc();
+  });
+
+  // Sync Rate
+  rSlider.addEventListener('input', function() {
+    rText.value = parseFloat(this.value).toFixed(1);
+    calc();
+  });
+  rText.addEventListener('input', function() {
+    rSlider.value = this.value;
+    calc();
+  });
+
+  // Sync Tenure
+  tSlider.addEventListener('input', function() {
+    tText.value = this.value;
+    calc();
+  });
+  tText.addEventListener('input', function() {
+    tSlider.value = this.value;
+    calc();
+  });
+
+  calc();
+</script>
+</body>
+</html>
